@@ -1,0 +1,15 @@
+numpy==1.23.5
+snakemake
+transformers
+pandas
+tqdm
+torch
+tensorboardX
+ablang
+sapiens
+antiberty
+fair-esm 
+scipy
+skorch
+scikit-learn
+keras
