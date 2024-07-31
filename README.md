@@ -1,9 +1,8 @@
 # PLM-pipeline
 
-## Workflow
-The workflow takes as input a list of sequences in a CSV. These are passed into a pretrained language model to do downstream calculations (likelihood etc.).
+The pipeline takes as input a list of sequences in a CSV. These are passed into a pretrained language model to do downstream calculations (likelihood etc.).
 
-## Running the workflow
+## Set up environment
 
 - Create a new environment:
 `conda create -n plm`
