@@ -97,7 +97,7 @@ class ESM():
                 if sequence[0] % (batch_size+1) == 0:   #Checkpoint save
                     pd.DataFrame(pooler_zero).to_csv("outfiles/"+self.file+"/embeddings.csv")
 
-        pd.DataFrame(pooler_zero).to_csv("outfiles/"+self.file+"/embeddings.csv")
+        return pd.DataFrame(pooler_zero,columns=[f"dim_{i}" for i in range(pooler_zero.shape[1])])
 
     def calc_evo_likelihood_matrix_per_position(self, sequences:list, batch_size = 10):
 

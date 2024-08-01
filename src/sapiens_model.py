@@ -57,8 +57,14 @@ class Sapiens():
 
         if self.layer == None:
             print("Using the average layer")
-            output = sequences.apply(lambda seq: pd.Series(np.mean(sapiens.predict_sequence_embedding(seq, chain_type=self.chain),axis = 0)))
-            output.to_csv("outfiles/"+self.file+"/embeddings.csv") #We have one embeded sequence per row
+            output = []
+            for j,sequence in enumerate(sequences):
+                try:
+                    output.append(list(np.mean(np.mean(sapiens.predict_residue_embedding(sequence, chain_type=self.chain), axis = 1),axis = 0)))
+                except:
+                    continue
+            output = pd.DataFrame(output, columns=[f"dim_{i}" for i in range(len(output[0]))])
+            return output.reset_index(drop=True)
         elif self.layer == "prob":
             print("\n Making probabilities")
             output = sequences.apply(lambda seq: pd.DataFrame(sapiens.predict_scores(seq, chain_type=self.chain)))
@@ -66,8 +72,14 @@ class Sapiens():
             pkl.dump([output,embedings],open("outfiles/"+self.file+"/probabilities_pseudo.pkl","wb"))
         else:
             print("\nUsing the {} layer".format(self.layer))
-            output = sequences.apply(lambda seq: pd.Series(sapiens.predict_sequence_embedding(seq, chain_type=self.chain, layer=self.layer)))
-            output.to_csv("outfiles/"+self.file+"/embeddings.csv") #We have one embeded sequence per row
+            output = []
+            for j,sequence in enumerate(sequences):
+                try:
+                    output.append(list(np.mean(sapiens.predict_residue_embedding(sequence, chain_type=self.chain), axis = 1)[self.layer-1,:]))
+                except:
+                    continue
+            output.columns = [f"dim_{i}" for i in range(output.shape[1])]
+            return output.reset_index(drop=True)
 
     def calc_pseudo_likelihood_sequence(self, sequences:list):
         pll_all_sequences = []
