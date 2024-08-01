@@ -78,8 +78,6 @@ class ProtBert():
                     output = output.last_hidden_state[:,-1][0]
                     
                 pooler_zero[sequence[0],:] = output.tolist()
-                if sequence[0] % (batch_size+1) == 0:   #Checkpoint save
-                    pd.DataFrame(pooler_zero).to_csv("outfiles/"+self.file+"/embeddings.csv") 
 
         return pd.DataFrame(pooler_zero,columns=[f"dim_{i}" for i in range(pooler_zero.shape[1])])
 
