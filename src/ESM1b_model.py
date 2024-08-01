@@ -13,7 +13,7 @@ sys.path.append("../scripts")
 from utils import get_pseudo_likelihood
 
 
-class ESM():
+class ESM1b():
 
     """
     Class for the protein Language Model
@@ -75,10 +75,14 @@ class ESM():
         batch_size = round(len(sequences)/batches)
         print("\nUsing the {} method".format(self.method))
         
-        pooler_zero = np.zeros((320, len(sequences)))
+        pooler_zero = np.zeros((len(sequences),1280))
         for sequence,_ in zip(enumerate(sequences), tqdm(range(len(sequences)))):
             if not isinstance(sequence[1], float):
-                tokenized_sequences = self.tokenizer(sequence[1], return_tensors= 'pt') #return tensors using pytorch
+                j = sequence[0]
+                amino_acids = list(sequence[1])
+                seq_tokens = ' '.join(amino_acids)
+                tokenized_sequences = self.tokenizer(seq_tokens, return_tensors= 'pt') #return tensors using pytorch
+                tokenized_sequences = tokenized_sequences.to(self.device)
                 output = self.model(**tokenized_sequences)
 
                 if self.method == "average":
@@ -93,9 +97,7 @@ class ESM():
                 elif self.method == "first":
                     output = output.last_hidden_state[0,0,:]
                     
-                pooler_zero[:,sequence[0]] = output.tolist()
-                if sequence[0] % (batch_size+1) == 0:   #Checkpoint save
-                    pd.DataFrame(pooler_zero).to_csv("outfiles/"+self.file+"/embeddings.csv")
+                pooler_zero[sequence[0],:] = output.tolist()
 
         return pd.DataFrame(pooler_zero,columns=[f"dim_{i}" for i in range(pooler_zero.shape[1])])
 
