@@ -41,7 +41,7 @@ class ProtBert():
         self.file = file_name
 
 
-    def fit_transform(self, sequences:list, starts, ends, batches = 10):
+    def fit_transform(self, sequences:list, batches = 10):
         """
         Fits the model and outputs the embeddings.
         
@@ -65,29 +65,23 @@ class ProtBert():
         print("\nUsing the {} method".format(self.method))
         for sequence,_ in zip(enumerate(sequences), tqdm(range(len(sequences)))):
             if not isinstance(sequence[1], float):
-                j = sequence[0]
-                seq_tokens = ' '.join(list(sequence[1]))
-                tokenized_sequences = self.tokenizer(seq_tokens, return_tensors= 'pt') #return tensors using pytorch
-                tokenized_sequences = tokenized_sequences.to(self.device)
+                tokenized_sequences = self.tokenizer(sequence[1], return_tensors= 'pt') #return tensors using pytorch
                 output = self.model(**tokenized_sequences)
-                
                 if self.method == "average":
-                    output = torch.mean(output.last_hidden_state[:,starts[j]:ends[j],:], axis = 1)[0]
+                    output = torch.mean(output.last_hidden_state, axis = 1)[0]
                 
                 elif self.method == "pooler":
                     output = output.pooler_output[0]
                 elif self.method == "first":
-                    output = output.last_hidden_state[:,starts[j]][0]
+                    output = output.last_hidden_state[:,0][0]
                 elif self.method == "last":
-                    output = output.last_hidden_state[:,ends[j]-1][0]
+                    output = output.last_hidden_state[:,-1][0]
                     
                 pooler_zero[sequence[0],:] = output.tolist()
-                # if sequence[0] % (batch_size+1) == 0:   #Checkpoint save
-                #     pd.DataFrame(pooler_zero).to_csv("outfiles/"+self.file+"/embeddings.csv") 
+                if sequence[0] % (batch_size+1) == 0:   #Checkpoint save
+                    pd.DataFrame(pooler_zero).to_csv("outfiles/"+self.file+"/embeddings.csv") 
 
-        # pd.DataFrame(pooler_zero).to_csv("outfiles/"+self.file+"/embeddings.csv")
-        
-        return pd.DataFrame(pooler_zero,columns=[f"dim_{i}" for i in range(pooler_zero.shape[1])])
+        pd.DataFrame(pooler_zero).to_csv("outfiles/"+self.file+"/embeddings.csv")
 
     def calc_evo_likelihood_matrix_per_position(self, sequences: list):
         probs = []
@@ -110,7 +104,7 @@ class ProtBert():
         likelihoods = get_pseudo_likelihood(probs, sequences) 
         pkl.dump([probs,likelihoods],open("outfiles/"+self.file+"/probabilities_pseudo.pkl","wb"))
 
-    def calc_pseudo_likelihood_sequence(self, sequences: list, starts, ends):
+    def calc_pseudo_likelihood_sequence(self, sequences: list):
         pll_all_sequences = []
         self.mask_model = self.mask_model.to(self.device)
 
@@ -126,7 +120,7 @@ class ProtBert():
                 df = df.iloc[1:-1,:]
 
                 per_position_ll = []
-                for i in range(starts[j],ends[j]):
+                for i in range(len(amino_acids)):
                     aa_i = amino_acids[i]
                     ll_i = np.log(df.iloc[i,:][aa_i])
                     per_position_ll.append(ll_i)

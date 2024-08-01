@@ -37,7 +37,7 @@ class Ablang():
     
 
 
-    def fit_transform(self, sequences, starts, ends):
+    def fit_transform(self, sequences):
         """
         Fits the model and outputs the embeddings.
         
@@ -50,11 +50,11 @@ class Ablang():
 
         None, saved the embeddings in the embeddings.csv
         """
+        print(sequences)
         output = self.model(sequences, mode=self.mode)
         if self.mode == "seqcoding":
             #The embeddings are made my averaging across all residues    
-            # pd.DataFrame(output).to_csv("outfiles/"+self.file+"/embeddings.csv")
-            return pd.DataFrame(output,columns=[f"dim_{i}" for i in range(output.shape[1])])
+            pd.DataFrame(output).to_csv("outfiles/"+self.file+"/embeddings.csv")
 
     def calc_evo_likelihood_matrix_per_position(self, sequences:list):
 
@@ -71,7 +71,7 @@ class Ablang():
         likelihoods = get_pseudo_likelihood(probs, sequences) 
         pkl.dump([probs,likelihoods],open("outfiles/"+self.file+"/probabilities_pseudo.pkl","wb"))
 
-    def calc_pseudo_likelihood_sequence(self, sequences: list, starts, ends):
+    def calc_pseudo_likelihood_sequence(self, sequences: list):
         pll_all_sequences = []
         for j,sequence in enumerate(tqdm(sequences)):
             try:
@@ -84,7 +84,7 @@ class Ablang():
 
 
                 per_position_ll = []
-                for i in range(starts[j],ends[j]):
+                for i in range(len(amino_acids)):
                     aa_i = amino_acids[i]
                     if aa_i == "-" or aa_i == "*":
                         continue

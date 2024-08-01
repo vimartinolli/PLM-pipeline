@@ -18,7 +18,7 @@ parser.add_argument('--model_name', help="Choose from: Ablang,ProtBert,Sapiens,E
 parser.add_argument('--file_path')
 parser.add_argument('--sequences_column')
 parser.add_argument('--output_folder')
-parser.add_argument('--calc_list', help="Example: ['pseudolikelihood' 'probability_matrix' 'embeddings']")
+parser.add_argument('--calc_list', nargs="*", help="Example: pseudolikelihood probability_matrix embeddings")
 
 args = parser.parse_args()
 
@@ -77,7 +77,8 @@ if model_name in ["Ablang","Sapiens"]:
             elif sequence_file["chain"] != "IGH":
                 model = model_lc
             prob_matrix = model.calc_probability_matrix(sequence_file[sequences_column][index])
-            prob_matrix.to_csv(os.path.join(save_path,f"prob_matrix_seq{sequence_file["sequence_id"][index]}_{model_name}.csv"), index = False)
+            seq_id = sequence_file["sequence_id"][index]
+            prob_matrix.to_csv(os.path.join(save_path,f"prob_matrix_seq{seq_id}_{model_name}.csv"), index = False)
 
     if "embeddings" in calc_list:
         #Calculate embeddings, add to sequence_file, and save as CSV
@@ -101,7 +102,8 @@ else: #If model is not Ablang or Sapiens:
         #For each sequence, calculate the probability matrix per position and save as CSV
         for index in sequence_file.index:
             prob_matrix = model.calc_probability_matrix(sequence_file[sequences_column][index])
-            prob_matrix.to_csv(os.path.join(save_path,f"prob_matrix_seq{sequence_file["sequence_id"][index]}_{model_name}.csv"), index = False)
+            seq_id = sequence_file["sequence_id"][index]
+            prob_matrix.to_csv(os.path.join(save_path,f"prob_matrix_seq{seq_id}_{model_name}.csv"), index = False)
     
     if "embeddings" in calc_list:
         #Calculate embeddings, add to sequence_file, and save as CSV
