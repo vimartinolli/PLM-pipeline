@@ -74,7 +74,7 @@ if model_name in ["Ablang","Sapiens"]:
         for index in sequence_file.index:
             if sequence_file["chain"][index] == "IGH":
                 model = model_hc
-            elif sequence_file["chain"] != "IGH":
+            elif sequence_file["chain"][index] != "IGH":
                 model = model_lc
             prob_matrix = model.calc_probability_matrix(sequence_file[sequences_column][index])
             seq_id = sequence_file["sequence_id"][index]
