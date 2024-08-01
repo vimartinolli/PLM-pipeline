@@ -15,7 +15,7 @@ The pipeline takes as input a list of sequences in a CSV, which are passed into 
 
 ## Run the pipeline
 Run the script `scripts/pipeline.py ` with the following arguments:
-- `model_name` class name of the model to use. Currently available: Ablang, ProtBert, Sapiens, ESM
+- `model_name` class name of the model to use. Currently available: Ablang, ProtBert, Sapiens, ESM1b
 - `file_path` path with the location of the input CSV file.
     - This CSV file should contain:
         - a column with a unique sequence identifier named `sequence_id`
