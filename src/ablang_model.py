@@ -50,12 +50,11 @@ class Ablang():
 
         None, saved the embeddings in the embeddings.csv
         """
-        print(sequences)
         output = self.model(sequences, mode=self.mode)
         if self.mode == "seqcoding":
             #The embeddings are made my averaging across all residues    
-            pd.DataFrame(output).to_csv("outfiles/"+self.file+"/embeddings.csv")
-
+            return pd.DataFrame(output,columns=[f"dim_{i}" for i in range(output.shape[1])])
+        
     def calc_evo_likelihood_matrix_per_position(self, sequences:list):
 
         probs = []
