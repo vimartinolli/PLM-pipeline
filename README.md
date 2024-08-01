@@ -1,6 +1,6 @@
 # PLM-pipeline
 
-The pipeline takes as input a list of sequences in a CSV. These are passed into a pretrained language model to do downstream calculations (likelihood etc.).
+The pipeline takes as input a list of sequences in a CSV, which are passed into a pretrained language model to perform downstream calculations.
 
 ## Set up environment
 
