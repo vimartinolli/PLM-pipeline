@@ -7,14 +7,14 @@ import argparse
 sys.path.append("../src")
 
 from ablang_model import Ablang
-from ESM_model import ESM
+from ESM1b_model import ESM1b
 from sapiens_model import Sapiens
 from protbert import ProtBert
 
 #### handle command-line arguments
 parser = argparse.ArgumentParser()
 
-parser.add_argument('--model_name', help="Choose from: Ablang,ProtBert,Sapiens,ESM") 
+parser.add_argument('--model_name', help="Choose from: Ablang,ProtBert,Sapiens,ESM1b") 
 parser.add_argument('--file_path')
 parser.add_argument('--sequences_column')
 parser.add_argument('--output_folder')
@@ -45,8 +45,8 @@ if model_name == "Ablang":
 elif model_name == "Sapiens":
     model_hc = Sapiens(chain_type="H")
     model_lc = Sapiens(chain_type="L")
-elif model_name == "ESM":
-    model = ESM()
+elif model_name == "ESM1b":
+    model = ESM1b()
 elif model_name == "ProtBert":
     model = ProtBert()
 else:
