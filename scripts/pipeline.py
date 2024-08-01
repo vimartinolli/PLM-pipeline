@@ -83,7 +83,7 @@ if model_name in ["Ablang","Sapiens"]:
     if "embeddings" in calc_list:
         #Calculate embeddings, add to sequence_file, and save as CSV
         sequence_file_hc = sequence_file[sequence_file["chain"] == "IGH"]
-        sequence_file_lc = sequence_file[sequence_file["chain"] == "IGl"]
+        sequence_file_lc = sequence_file[sequence_file["chain"] != "IGH"]
         embeds_hc = model_hc.fit_transform(sequences=list(sequence_file_hc[sequences_column]))
         embeds_lc = model_lc.fit_transform(sequences=list(sequence_file_lc[sequences_column]))
         embeds_hc = pd.concat([sequence_file_hc,embeds_hc],axis=1)
