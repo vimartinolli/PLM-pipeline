@@ -17,6 +17,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--model_name', help="Choose from: Ablang,ProtBert,Sapiens,ESM1b") 
 parser.add_argument('--file_path')
 parser.add_argument('--sequences_column')
+parser.add_argument('--sequence_id_column', default="sequence_id", help="Column name in the input file where sequence ID's are stored.")
 parser.add_argument('--output_folder')
 parser.add_argument('--calc_list', nargs="*", help="Example: pseudolikelihood probability_matrix embeddings")
 
@@ -27,11 +28,12 @@ model_name = args.model_name
 file_path = args.file_path
 save_path = args.output_folder
 calc_list = args.calc_list
+seq_id_column = args.sequence_id_column
 
 #### Read input file 
 sequence_file  = pd.read_csv(file_path)
-if "sequence_id" not in sequence_file.columns:
-    print("Column 'sequence_id' not found in input CSV. Make sure your input file contains unique sequence identifiers.")
+if seq_id_column not in sequence_file.columns:
+    print("Column " + seq_id_column + " not found in input CSV. Make sure your input file contains unique sequence identifiers.")
     sys.exit()
 
 #### Create if output folder (if necessary)
@@ -77,7 +79,7 @@ if model_name in ["Ablang","Sapiens"]:
             elif sequence_file["chain"][index] != "IGH":
                 model = model_lc
             prob_matrix = model.calc_probability_matrix(sequence_file[sequences_column][index])
-            seq_id = sequence_file["sequence_id"][index]
+            seq_id = sequence_file[seq_id_column][index]
             prob_matrix.to_csv(os.path.join(save_path,f"prob_matrix_seq{seq_id}_{model_name}.csv"), index = False)
 
     if "embeddings" in calc_list:
@@ -102,7 +104,7 @@ else: #If model is not Ablang or Sapiens:
         #For each sequence, calculate the probability matrix per position and save as CSV
         for index in sequence_file.index:
             prob_matrix = model.calc_probability_matrix(sequence_file[sequences_column][index])
-            seq_id = sequence_file["sequence_id"][index]
+            seq_id = sequence_file[seq_id_column][index]
             prob_matrix.to_csv(os.path.join(save_path,f"prob_matrix_seq{seq_id}_{model_name}.csv"), index = False)
     
     if "embeddings" in calc_list:

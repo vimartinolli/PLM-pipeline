@@ -20,9 +20,9 @@ Run the script `scripts/pipeline.py ` with the following arguments:
     - This CSV file should contain:
         - a column with a unique sequence identifier named `sequence_id`
         - a column with the sequence specified in the parameter `sequence_column`
-        - a column named `chain` with either IGH/IGL/IGK for Ig heavy chain or light chain sequences respectively, only necessary when using the models Ablang and Sapiens
-    
+        - a column named `chain` with either IGH/IGL/IGK for Ig heavy chain or light chain sequences respectively, only necessary when using the models Ablang and Sapiens   
 - `sequence_column` column name of the sequence to use in the input CSV
+- `sequence_id_column` column name of the sequence identifier in the input CSV (default: sequence_id)
 - `output_folder` folder name to store output
 - `calc_list` list of the downstream calculations to perform
     - `pseudolikelihood` calculates pseudolikelihood for each sequence, adds it to the input CSV, and saves this as output CSV
