@@ -80,7 +80,7 @@ if model_name in ["Ablang","Sapiens"]:
                 model = model_lc
             prob_matrix = model.calc_probability_matrix(sequence_file[sequences_column][index])
             seq_id = sequence_file[seq_id_column][index]
-            prob_matrix.to_csv(os.path.join(save_path,f"prob_matrix_seq{seq_id}_{model_name}.csv"), index = False)
+            prob_matrix.to_csv(os.path.join(save_path,f"prob_matrix_seq_{seq_id}_{model_name}.csv"), index = False)
 
     if "embeddings" in calc_list:
         #Calculate embeddings, add to sequence_file, and save as CSV
@@ -105,7 +105,7 @@ else: #If model is not Ablang or Sapiens:
         for index in sequence_file.index:
             prob_matrix = model.calc_probability_matrix(sequence_file[sequences_column][index])
             seq_id = sequence_file[seq_id_column][index]
-            prob_matrix.to_csv(os.path.join(save_path,f"prob_matrix_seq{seq_id}_{model_name}.csv"), index = False)
+            prob_matrix.to_csv(os.path.join(save_path,f"prob_matrix_seq_{seq_id}_{model_name}.csv"), index = False)
     
     if "embeddings" in calc_list:
         #Calculate embeddings, add to sequence_file, and save as CSV
