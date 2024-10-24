@@ -53,14 +53,14 @@ def get_pseudo_likelihood(probs, sequences):
     return probs_all
 
 # Newly added
-def calculate_mutations(sequences_file, prob_matrix_folder, num_mutations, output_file):
+def calculate_mutations(sequences_file, prob_matrix_folder, num_mutations, output_file, model_name):
 
-    # Check if the column with the sequences exists in the input
-    if 'sequence' not in sequences_file.columns:
-        raise ValueError("The sequences file must contain a column named 'sequence'")
+    # Check if the necessary columns exist in the input
+    if 'sequence' not in sequences_file.columns or 'sequence_id' not in sequences_file.columns:
+        raise ValueError("The sequences file must contain columns named 'sequence' and 'sequence_id'")
         
-    # Extract the sequences from the DataFrame and convert them to a list
-    sequences = sequences_file['sequence'].tolist()
+    # Extract the sequences and sequence IDs from the DataFrame
+    sequences = sequences_file[['sequence_id', 'sequence']].to_dict(orient='records')
 
     # Create an empty DataFrame to store all mutations across different sequences
     all_mutations_df = pd.DataFrame()
@@ -68,23 +68,21 @@ def calculate_mutations(sequences_file, prob_matrix_folder, num_mutations, outpu
     # Check if the probability matrix folder exists
     if not os.path.exists(prob_matrix_folder):
         raise FileNotFoundError(f"The probability matrix folder '{prob_matrix_folder}' does not exist.")
-        
-    # Get paths of all probability matrices in the folder
-    prob_matrix_paths = [os.path.join(prob_matrix_folder, f) for f in os.listdir(prob_matrix_folder) if f.endswith('.csv')]
 
-    # Sort the paths based on the numerical order of "seq" ID in filenames
-    def extract_sequence_number(file_path):
-        match = re.search(r'seq(\d+)_', file_path)
-        return int(match.group(1)) if match else float('inf')
+    # Iterate over all sequences
+    for seq in sequences:
 
-    prob_matrix_paths = sorted(prob_matrix_paths, key=extract_sequence_number)
+        sequence_id = seq['sequence_id']
+        sequence = seq['sequence']
 
-    # Validate the number of matrices matches the number of sequences
-    if len(prob_matrix_paths) < len(sequences):
-        raise ValueError("The number of probability matrices is less than the number of sequences. Make sure you have enough matrices.")
+        # Construct the expected filename for the probability matrix based on sequence_id
+        prob_matrix_path = os.path.join(prob_matrix_folder, f"prob_matrix_seq{sequence_id}_{model_name}.csv")
 
-    # Iterate over all sequences and their probability matrices
-    for seq_id, (sequence, prob_matrix_path) in enumerate(zip(sequences, prob_matrix_paths), start=1):
+        # Check if the file exists
+        if not os.path.exists(prob_matrix_path):
+            print(f"Warning: Probability matrix for sequence_id {sequence_id} and model_name '{model_name}'not found at {prob_matrix_path}. Skipping.")
+            continue
+
         try:
             # Read the probability matrix
             prob_matrix = pd.read_csv(prob_matrix_path)

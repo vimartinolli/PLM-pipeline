@@ -105,7 +105,8 @@ if model_name in ["Ablang","Sapiens"]:
             sequences_file=sequence_file,
             prob_matrix_folder=save_path,
             num_mutations=number_mutations,
-            output_file=output_file
+            output_file=output_file,
+            model_name=model_name
         )
 
 else: #If model is not Ablang or Sapiens:
@@ -136,5 +137,6 @@ else: #If model is not Ablang or Sapiens:
             sequences_file=sequence_file,
             prob_matrix_folder=save_path,
             num_mutations=number_mutations,
-            output_file=output_file
+            output_file=output_file,
+            model_name=model_name
         )
