@@ -126,7 +126,7 @@ def calculate_mutations(sequences_file, prob_matrix_folder, num_mutations, outpu
                 delta = highest_prob_value - original_prob
 
                 mutations.append({
-                    'sequence_id': seq_id,
+                    'sequence_id': sequence_id,
                     'sequence': sequence,
                     'position': position + 1,
                     'original_token': original_token,
