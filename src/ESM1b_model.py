@@ -174,6 +174,6 @@ class ESM1b():
         logits = self.mask_model(**seq_tokens).logits[0].cpu().detach().numpy()
         prob = scipy.special.softmax(logits,axis = 1)
         df = pd.DataFrame(prob, columns = self.tokenizer.convert_ids_to_tokens(range(0,33)))
-        df = df.iloc[1:-1,:]
-
+        df = df.iloc[1:-1, 4:-9] # Newly added
+        
         return df

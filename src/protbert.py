@@ -139,6 +139,6 @@ class ProtBert():
         logits = self.mask_model(**seq_tokens).logits[0].cpu().detach().numpy()
         prob = scipy.special.softmax(logits,axis = 1)
         df = pd.DataFrame(prob, columns = self.tokenizer.vocab)
-        df = df.iloc[1:-1,:]
-
+        df = df.iloc[1:-1, 5:-5] # Newly added
+        
         return df

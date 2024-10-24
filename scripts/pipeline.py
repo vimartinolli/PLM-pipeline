@@ -6,6 +6,7 @@ import argparse
 
 sys.path.append("../src")
 
+from utils import calculate_mutations # Newly added
 from ablang_model import Ablang
 from ESM1b_model import ESM1b
 from sapiens_model import Sapiens
@@ -20,6 +21,8 @@ parser.add_argument('--sequences_column')
 parser.add_argument('--sequence_id_column', default="sequence_id", help="Column name in the input file where sequence ID's are stored.")
 parser.add_argument('--output_folder')
 parser.add_argument('--calc_list', nargs="*", help="Example: pseudolikelihood probability_matrix embeddings")
+parser.add_argument('--calc_list', nargs="*", help="Example: pseudolikelihood, probability_matrix, embeddings, calculate_mutations") # Newly added
+parser.add_argument('--number_mutations', help="Choose the number of mutations you want the model to suggest")  # Newly added
 
 args = parser.parse_args()
 
@@ -29,6 +32,7 @@ file_path = args.file_path
 save_path = args.output_folder
 calc_list = args.calc_list
 seq_id_column = args.sequence_id_column
+number_mutations = int(args.number_mutations) if args.number_mutations else None  # Newly added
 
 #### Read input file 
 sequence_file  = pd.read_csv(file_path)
@@ -93,6 +97,17 @@ if model_name in ["Ablang","Sapiens"]:
         embeds = pd.concat([embeds_hc, embeds_lc], ignore_index=True)  
         embeds.to_csv(os.path.join(save_path,f"embeddings_{model_name}.csv"), index=False) 
 
+    if "calculate_mutations" in calc_list:  # Newly added
+        # Define the output file
+        output_file = os.path.join(save_path, f"{model_name}_{number_mutations}_mutations.csv")
+        # Call the function to calculate mutations and save the results in a single CSV file
+        calculate_mutations(
+            sequences_file=sequence_file,
+            prob_matrix_folder=save_path,
+            num_mutations=number_mutations,
+            output_file=output_file
+        )
+
 else: #If model is not Ablang or Sapiens:
     #### Perform calculations
     if "pseudolikelihood" in calc_list:
@@ -111,8 +126,15 @@ else: #If model is not Ablang or Sapiens:
         #Calculate embeddings, add to sequence_file, and save as CSV
         embeds = model.fit_transform(sequences=list(sequence_file[sequences_column]))
         embeds = pd.concat([sequence_file,embeds],axis=1)  
-        embeds.to_csv(os.path.join(save_path,f"embeddings_{model_name}.csv"), index=False) 
-        
+        embeds.to_csv(os.path.join(save_path,f"embeddings_{model_name}.csv"), index=False)
 
-
-   
+    if "calculate_mutations" in calc_list: # Newly added
+        # Define the output file
+        output_file = os.path.join(save_path, f"{model_name}_{number_mutations}_mutations.csv")
+        # Call the function to calculate mutations and save the results in a single CSV file
+        calculate_mutations(
+            sequences_file=sequence_file,
+            prob_matrix_folder=save_path,
+            num_mutations=number_mutations,
+            output_file=output_file
+        )
