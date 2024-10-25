@@ -53,51 +53,20 @@ def get_pseudo_likelihood(probs, sequences):
     return probs_all
 
 # Newly added
-def calculate_mutations(sequences_file, prob_matrix_folder, num_mutations, output_file, model_name):
-
-    # Check if the necessary columns exist in the input
-    if 'sequence' not in sequences_file.columns or 'sequence_id' not in sequences_file.columns:
-        raise ValueError("The sequences file must contain columns named 'sequence' and 'sequence_id'")
+def calculate_mutations(sequences_file, prob_matrix, num_mutations, output_file, seq_id_column, sequences_column):
         
     # Extract the sequences and sequence IDs from the DataFrame
-    sequences = sequences_file[['sequence_id', 'sequence']].to_dict(orient='records')
+    sequences = sequences_file[[seq_id_column, sequences_column]].to_dict(orient='records')
 
     # Create an empty DataFrame to store all mutations across different sequences
     all_mutations_df = pd.DataFrame()
-
-    # Check if the probability matrix folder exists
-    if not os.path.exists(prob_matrix_folder):
-        raise FileNotFoundError(f"The probability matrix folder '{prob_matrix_folder}' does not exist.")
 
     # Iterate over all sequences
     for seq in sequences:
 
         sequence_id = seq['sequence_id']
         sequence = seq['sequence']
-
-        # Construct the expected filename for the probability matrix based on sequence_id
-        prob_matrix_path = os.path.join(prob_matrix_folder, f"prob_matrix_seq{sequence_id}_{model_name}.csv")
-
-        # Check if the file exists
-        if not os.path.exists(prob_matrix_path):
-            print(f"Warning: Probability matrix for sequence_id {sequence_id} and model_name '{model_name}'not found at {prob_matrix_path}. Skipping.")
-            continue
-
-        try:
-            # Read the probability matrix
-            prob_matrix = pd.read_csv(prob_matrix_path)
-
-            # Verify if all values are numeric
-            if not prob_matrix.map(lambda x: isinstance(x, (int, float, complex)) and not pd.isna(x)).all().all():
-                raise ValueError(f"The probability matrix '{prob_matrix_path}' contains non-numeric values or missing data.")
-
-            # Convert to numeric
-            prob_matrix = prob_matrix.apply(pd.to_numeric, errors='raise')
-
-        except Exception as e:
-            print(f"Error loading probability matrix from {prob_matrix_path}: {e}")
-            continue
-
+        
         # Initialize an empty list to store the mutations for the current sequence
         mutations = []
 
