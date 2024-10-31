@@ -20,8 +20,8 @@ parser.add_argument('--file_path')
 parser.add_argument('--sequences_column')
 parser.add_argument('--sequence_id_column', default="sequence_id", help="Column name in the input file where sequence ID's are stored.")
 parser.add_argument('--output_folder')
-parser.add_argument('--calc_list', nargs="*", help="Example: pseudolikelihood, probability_matrix_and_mutations, embeddings") # Newly added
-parser.add_argument('--number_mutations', help="Choose the number of mutations you want the model to suggest")  # Newly added
+parser.add_argument('--calc_list', nargs="*", help="Example: pseudolikelihood, probability_matrix_and_mutations, embeddings")
+parser.add_argument('--number_mutations', help="Choose the number of mutations you want the model to suggest (Default is 1)")
 
 args = parser.parse_args()
 
@@ -31,7 +31,7 @@ file_path = args.file_path
 save_path = args.output_folder
 calc_list = args.calc_list
 seq_id_column = args.sequence_id_column
-number_mutations = int(args.number_mutations) if args.number_mutations else None  # Newly added
+number_mutations = int(args.number_mutations) if args.number_mutations else 1
 
 #### Read input file 
 sequence_file  = pd.read_csv(file_path)
