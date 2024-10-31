@@ -53,83 +53,61 @@ def get_pseudo_likelihood(probs, sequences):
     return probs_all
 
 # Newly added
-def calculate_mutations(sequences_file, prob_matrix, num_mutations, output_file, seq_id_column, sequences_column):
+def calculate_mutations(sequences_file, prob_matrix, num_mutations, seq_id_column, sequences_column):
         
-    # Extract the sequences and sequence IDs from the DataFrame
+    # Extract the sequence and sequence IDs from the DataFrame
     sequences = sequences_file[[seq_id_column, sequences_column]].to_dict(orient='records')
+    sequence_id = sequences[0][seq_id_column]
+    sequence = sequences[0][sequences_column]
 
-    # Create an empty DataFrame to store all mutations across different sequences
-    all_mutations_df = pd.DataFrame()
+    # Create a list to store mutations for the current sequence
+    mutations = []
+    
+    # Iterate over each position in the sequence
+    for position in range(min(len(sequence), len(prob_matrix))):
+    
+        original_token = sequence[position]
+        position_probs = prob_matrix.iloc[position]
 
-    # Iterate over all sequences
-    for seq in sequences:
+        top_tokens = position_probs.nlargest(3)
 
-        sequence_id = seq['sequence_id']
-        sequence = seq['sequence']
-        
-        # Initialize an empty list to store the mutations for the current sequence
-        mutations = []
+        for mutated_token, highest_prob_value in top_tokens.items():
+            if mutated_token == original_token:
+                continue
 
-        # Iterate over each position in the sequence
-        for position in range(min(len(sequence), len(prob_matrix))):
-        
-            original_token = sequence[position]
+            original_prob = position_probs.get(original_token, 0)
+            delta = highest_prob_value - original_prob
 
-            # Get probabilities for the current position
-            position_probs = prob_matrix.iloc[position]
-
-            # Select the three tokens with the highest probabilities
-            top_tokens = position_probs.nlargest(3)
-
-            # Iterate over the selected tokens to propose mutations
-            for mutated_token, highest_prob_value in top_tokens.items():
+            mutations.append({
+                'sequence_id': sequence_id,
+                'sequence': sequence,
+                'position': position + 1,
+                'original_token': original_token,
+                'mutated_token': mutated_token,
+                'predicted_probabilities': highest_prob_value,
+                'original_probabilities': original_prob,
+                'delta_probabilities': delta
+            })
             
-                # Skip mutation if the mutated token is the same as the original token
-                if mutated_token == original_token:
-                    continue
+    # Select the main mutations
+    mutations.sort(key=lambda x: x['delta_probabilities'], reverse=True)
+    selected_mutations = mutations[:int(num_mutations)]
 
-                # Get the probability of the original token
-                original_prob = position_probs.get(original_token, 0)
-
-                # Calculate delta between the predicted token and the original token
-                delta = highest_prob_value - original_prob
-
-                mutations.append({
-                    'sequence_id': sequence_id,
-                    'sequence': sequence,
-                    'position': position + 1,
-                    'original_token': original_token,
-                    'mutated_token': mutated_token,
-                    'delta': delta,
-                    'predicted_probabilities': highest_prob_value,
-                    'original_probabilities': original_prob,
-                    'delta_probabilities': delta
-                })
-
-        # Sort mutations by delta value in descending order to prioritize the most significant mutations
-        mutations.sort(key=lambda x: x['delta'], reverse=True)
-
-        # Select the top 'num_mutations' based on delta values
-        selected_mutations = mutations[:int(num_mutations)]
-
-        # Convert selected mutations to a DataFrame and add to the overall DataFrame
-        if selected_mutations:
-            selected_mutations_df = pd.DataFrame(selected_mutations)
-            selected_mutations_df['mutations'] = selected_mutations_df.apply(lambda row: f"{row['original_token']}{row['position']}{row['mutated_token']}", axis=1)
-            all_mutations_df = pd.concat([all_mutations_df, selected_mutations_df], ignore_index=True)
-
-    # Group mutations by sequence_id and combine into a single vector
-    if not all_mutations_df.empty:
-        grouped_mutations_df = all_mutations_df.groupby('sequence_id').agg({
+    # Converts to DataFrame and formats with the delimiter |
+    if selected_mutations:
+        selected_mutations_df = pd.DataFrame(selected_mutations)
+        selected_mutations_df['mutations'] = selected_mutations_df.apply(lambda row: f"{row['original_token']}{row['position']}{row['mutated_token']}", axis=1)
+        
+        # Groups and combines mutations in delimited formato
+        grouped_mutations_df = selected_mutations_df.groupby('sequence_id').agg({
             'sequence': 'first',
             'mutations': lambda x: '|'.join(x),
             'predicted_probabilities': lambda x: '|'.join(map(str, x)),
             'original_probabilities': lambda x: '|'.join(map(str, x)),
             'delta_probabilities': lambda x: '|'.join(map(str, x))
         }).reset_index()
-
-        # Save all mutations to a CSV file
-        grouped_mutations_df.to_csv(output_file, index=False)
-        print(f"All mutations saved to: {output_file}")
+        
+        return grouped_mutations_df
     else:
-        print("No mutations found to save.")
+        print(f"No significant mutations found for sequence ID {sequence_id}.")
+        return pd.DataFrame()

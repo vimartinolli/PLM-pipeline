@@ -20,7 +20,7 @@ parser.add_argument('--file_path')
 parser.add_argument('--sequences_column')
 parser.add_argument('--sequence_id_column', default="sequence_id", help="Column name in the input file where sequence ID's are stored.")
 parser.add_argument('--output_folder')
-parser.add_argument('--calc_list', nargs="*", help="Example: pseudolikelihood, probability_matrix, embeddings, calculate_mutations") # Newly added
+parser.add_argument('--calc_list', nargs="*", help="Example: pseudolikelihood, probability_matrix_and_mutations, embeddings") # Newly added
 parser.add_argument('--number_mutations', help="Choose the number of mutations you want the model to suggest")  # Newly added
 
 args = parser.parse_args()
@@ -74,16 +74,39 @@ if model_name in ["Ablang","Sapiens"]:
         sequence_file.loc[is_light_chain,"evo_likelihood"] = model_lc.calc_pseudo_likelihood_sequence(list(sequence_file[is_light_chain][sequences_column]))
         sequence_file.to_csv(os.path.join(save_path,f"evo_likelihood_{model_name}.csv"), index=False)
 
-    if "probability_matrix" in calc_list:
-        #For each sequence, calculate the probability matrix per position and save as CSV
+    if "probability_matrix_and_mutations" in calc_list:
+        
+        # Create a dataframe to store all the mutations of all sequences
+        all_mutations_df = pd.DataFrame()
+
         for index in sequence_file.index:
             if sequence_file["chain"][index] == "IGH":
                 model = model_hc
             elif sequence_file["chain"][index] != "IGH":
                 model = model_lc
+           
+            # Calculates and saves the probability matrix for each sequence
             prob_matrix = model.calc_probability_matrix(sequence_file[sequences_column][index])
             seq_id = sequence_file[seq_id_column][index]
+            
+            # Saves the probability matrix as CSV
             prob_matrix.to_csv(os.path.join(save_path,f"prob_matrix_seq_{seq_id}_{model_name}.csv"), index = False)
+
+            mutations_df = calculate_mutations(
+                sequences_file=sequence_file.loc[[index]],
+                prob_matrix=prob_matrix,
+                num_mutations=number_mutations,
+                seq_id_column=seq_id_column,
+                sequences_column=sequences_column
+                )
+                
+            # Concatenates the mutations obtained from the current sequence to the global DataFrame
+            all_mutations_df = pd.concat([all_mutations_df, mutations_df], ignore_index=True)
+            
+        # Saves all the mutations at the end, out of the loop
+        output_file = os.path.join(save_path, f"{model_name}_{number_mutations}_mutations.csv")
+        all_mutations_df.to_csv(output_file, index=False)
+        print(f"All mutations saved to: {output_file}")
 
     if "embeddings" in calc_list:
         #Calculate embeddings, add to sequence_file, and save as CSV
@@ -96,43 +119,44 @@ if model_name in ["Ablang","Sapiens"]:
         embeds = pd.concat([embeds_hc, embeds_lc], ignore_index=True)  
         embeds.to_csv(os.path.join(save_path,f"embeddings_{model_name}.csv"), index=False) 
 
-    if "calculate_mutations" in calc_list:  # Newly added
-        # Define the output file
-        output_file = os.path.join(save_path, f"{model_name}_{number_mutations}_mutations.csv")
-        # Call the function to calculate mutations and save the results in a single CSV file
-        calculate_mutations(
-            sequences_file=sequence_file,
-            prob_matrix_folder=save_path,
-            num_mutations=number_mutations,
-            output_file=output_file,
-            model_name=model_name
-        )
-
 else: #If model is not Ablang or Sapiens:
+
     #### Perform calculations
     if "pseudolikelihood" in calc_list:
         #Calculate pseudolikelihood, add to sequence_file, and save as CSV
         sequence_file["evo_likelihood"] = model.calc_pseudo_likelihood_sequence(list(sequence_file[sequences_column]))
         sequence_file.to_csv(os.path.join(save_path,f"evo_likelihood_{model_name}.csv"), index=False)
     
-    if "probability_matrix" in calc_list or "calculate_mutations" in calc_list:
-        #For each sequence, calculate the probability matrix per position and save as CSV
+    if "probability_matrix_and_mutations" in calc_list:
+        
+        # Create a dataframe to store all the mutations of all sequences
+        all_mutations_df = pd.DataFrame()
+        
         for index in sequence_file.index:
-            prob_matrix = model.calc_probability_matrix(sequence_file[sequences_column][index])
+            
+            # Calculates and saves the probability matrix for each sequence
             seq_id = sequence_file[seq_id_column][index]
+            prob_matrix = model.calc_probability_matrix(sequence_file[sequences_column][index])
+
+            # Saves the probability matrix as CSV
             prob_matrix.to_csv(os.path.join(save_path,f"prob_matrix_seq_{seq_id}_{model_name}.csv"), index = False)
-            if "calculate_mutations" in calc_list:
-                #Start your calculate_mutations function with prob_matrix as probability matrix
-                output_file = os.path.join(save_path, f"{model_name}_{number_mutations}_mutations.csv")
-                calculate_mutations(
-                    sequences_file=sequence_file,
-                    prob_matrix=prob_matrix,
-                    num_mutations=number_mutations,
-                    output_file=output_file,
-                    seq_id_column=seq_id_column,
-                    sequences_column=sequences_column
-                    )
-    
+            
+            mutations_df = calculate_mutations(
+                sequences_file=sequence_file.loc[[index]],
+                prob_matrix=prob_matrix,
+                num_mutations=number_mutations,
+                seq_id_column=seq_id_column,
+                sequences_column=sequences_column
+                )
+                
+            # Concatenates the mutations obtained from the current sequence to the global DataFrame
+            all_mutations_df = pd.concat([all_mutations_df, mutations_df], ignore_index=True)
+            
+        # Saves all the mutations at the end, out of the loop
+        output_file = os.path.join(save_path, f"{model_name}_{number_mutations}_mutations.csv")
+        all_mutations_df.to_csv(output_file, index=False)
+        print(f"All mutations saved to: {output_file}")
+
     if "embeddings" in calc_list:
         #Calculate embeddings, add to sequence_file, and save as CSV
         embeds = model.fit_transform(sequences=list(sequence_file[sequences_column]))
