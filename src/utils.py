@@ -2,13 +2,14 @@ import os
 import pandas as pd
 import numpy as np
 from Bio.Align import PairwiseAligner
-import re # Newly added
-import warnings # Newly added
-from transformers import logging # Newly added
-import logging # Newly added
-from transformers import logging as transformers_logging # Newly added
-logging.basicConfig(level=logging.WARNING) # Newly added
-transformers_logging.set_verbosity_error() # Newly added
+import re 
+import warnings
+import logging
+from transformers import logging as transformers_logging
+
+#Log warning messages
+logging.basicConfig(level=logging.WARNING)
+transformers_logging.set_verbosity_error()
 
 def prepare_sequence(path_to_file:str):
     """
