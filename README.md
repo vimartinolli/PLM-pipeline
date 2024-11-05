@@ -28,6 +28,8 @@ Run the script `scripts/pipeline.py ` with the following arguments:
     - `pseudolikelihood` calculates pseudolikelihood for each sequence, adds it to the input CSV, and saves this as output CSV
     - `probability_matrix` calculates the probability matrix of each amino acid per position of each sequence and save this matrix as CSV
     - `embeddings` takes the average output embeddings for each sequence, adds it to the input CSV, and saves this as output CSV
+    - `suggest_mutations`: based on the previously calculated probability matrix values it suggests a desired number of mutations
+- `number_mutations` number of mutations you want the model to suggest (default is 1)
 
 ## Adding new models
 - Create a .py file which will contain the model class in the folder `src/`. Be careful that the name of the file is not the same as any of the packages that we are using
