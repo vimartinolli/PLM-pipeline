@@ -65,8 +65,8 @@ class ProtBert():
         print("\nUsing the {} method".format(self.method))
         for sequence,_ in zip(enumerate(sequences), tqdm(range(len(sequences)))):
             if not isinstance(sequence[1], float):
-                seq_tokens = ' '.join(list(sequence[1]))
-                tokenized_sequences = self.tokenizer(seq_tokens, return_tensors= 'pt') #return tensors using pytorch
+                #seq_tokens = ' '.join(list(sequence[1]))
+                tokenized_sequences = self.tokenizer(sequence[1], return_tensors= 'pt').to(self.device) #return tensors using pytorch
                 output = self.model(**tokenized_sequences)
                 if self.method == "average":
                     output = torch.mean(output.last_hidden_state, axis = 1)[0]
