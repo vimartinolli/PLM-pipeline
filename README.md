@@ -30,6 +30,7 @@ Run the script `scripts/pipeline.py ` with the following arguments:
     - `embeddings` takes the average output embeddings for each sequence, adds it to the input CSV, and saves this as output CSV
     - `suggest_mutations`: based on the previously calculated probability matrix values it suggests a desired number of mutations
 - `number_mutations` number of mutations you want the model to suggest (default is 1)
+- `cache_dir` path to a cache directory to download the pretrained ESM1b model if the standard cache should not be used.
 
 ## Adding new models
 - Create a .py file which will contain the model class in the folder `src/`. Be careful that the name of the file is not the same as any of the packages that we are using

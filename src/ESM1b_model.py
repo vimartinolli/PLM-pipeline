@@ -19,7 +19,7 @@ class ESM1b():
     Class for the protein Language Model
     """
 
-    def __init__(self, method = "average", file_name = "."):
+    def __init__(self, method = "average", file_name = ".", cache_dir = "default"):
         
         """
         Creates the instance of the language model instance, loads tokenizer and model
@@ -33,27 +33,27 @@ class ESM1b():
         file_name: `str`
         The name of the folder to store the embeddings
         """
-        CACHE_DIR = "/hpc/dla_lti/dvanginneken/cache"
+        
+
         torch.cuda.empty_cache()
 
         self.name_ = "esm1b_t33_650M_UR50S"
-        self.tokenizer = AutoTokenizer.from_pretrained("facebook/esm1b_t33_650M_UR50S", cache_dir=CACHE_DIR)
-
         self.method = method
         self.file = file_name
         self.repr_layer_ = -1
-
         self.device = "cuda:0" if torch.cuda.is_available() else "cpu"
 
-        # model, alphabet = pretrained.load_model_and_alphabet(self.name_)
-        # model.eval()
+        # Check if a cache directory is specified, otherwise use the default
+        if cache_dir != "default":
+            CACHE_DIR = cache_dir
+            self.tokenizer = AutoTokenizer.from_pretrained("facebook/esm1b_t33_650M_UR50S", cache_dir=CACHE_DIR)
+            self.model = EsmModel.from_pretrained("facebook/esm1b_t33_650M_UR50S", cache_dir=CACHE_DIR).to(self.device)
+            self.mask_model = EsmForMaskedLM.from_pretrained("facebook/esm1b_t33_650M_UR50S", cache_dir=CACHE_DIR).to(self.device)
+        else:
+            self.tokenizer = AutoTokenizer.from_pretrained("facebook/esm1b_t33_650M_UR50S")
+            self.model = EsmModel.from_pretrained("facebook/esm1b_t33_650M_UR50S").to(self.device)
+            self.mask_model = EsmForMaskedLM.from_pretrained("facebook/esm1b_t33_650M_UR50S").to(self.device)
 
-        # if torch.cuda.is_available():
-        #     model = model.cuda()
-        # #model and alphabet
-        self.model = EsmModel.from_pretrained("facebook/esm1b_t33_650M_UR50S", cache_dir=CACHE_DIR).to(self.device)
-
-        self.mask_model = EsmForMaskedLM.from_pretrained("facebook/esm1b_t33_650M_UR50S", cache_dir=CACHE_DIR).to(self.device)
         
 
     def fit_transform(self, sequences:list, batches = 10):

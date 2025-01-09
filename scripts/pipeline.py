@@ -27,6 +27,7 @@ parser.add_argument('--sequence_id_column', default="sequence_id", help="Column 
 parser.add_argument('--output_folder')
 parser.add_argument('--calc_list', nargs="*", help="Example: pseudolikelihood, probability_matrix, suggest_mutations, embeddings")
 parser.add_argument('--number_mutations', help="Choose the number of mutations you want the model to suggest (Default is 1)")
+parser.add_argument('--cache_dir', default = "default", help="Potential cache directory for ESM1b pretrained model.")
 
 args = parser.parse_args()
 
@@ -35,6 +36,7 @@ model_name = args.model_name
 file_path = args.file_path
 save_path = args.output_folder
 seq_id_column = args.sequence_id_column
+cache_dir = args.cache_dir
 number_mutations = int(args.number_mutations) if args.number_mutations else 1 #If number_mutations is not supplied, set to 1
 calc_list = args.calc_list
 if("suggest_mutations" in calc_list):
@@ -59,7 +61,7 @@ elif model_name == "Sapiens":
     model_hc = Sapiens(chain_type="H")
     model_lc = Sapiens(chain_type="L")
 elif model_name == "ESM1b":
-    model = ESM1b()
+    model = ESM1b(cache_dir)
 elif model_name == "ProtBert":
     model = ProtBert()
 else:
