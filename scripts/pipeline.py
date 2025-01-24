@@ -61,7 +61,7 @@ elif model_name == "Sapiens":
     model_hc = Sapiens(chain_type="H")
     model_lc = Sapiens(chain_type="L")
 elif model_name == "ESM1b":
-    model = ESM1b(cache_dir)
+    model = ESM1b(cache_dir=cache_dir)
 elif model_name == "ProtBert":
     model = ProtBert()
 else:
