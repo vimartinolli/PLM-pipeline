@@ -11,9 +11,11 @@ The pipeline takes as input a list of sequences in a CSV, which are passed into 
 `conda activate plm`
 
 - To install necessary libraries:
-`pip install -r requirements.txt`
+`pip install -r requirements.txt`  
+or `pip install -r requirements_sapiens.txt` since Sapiens is not compatible with Python version 3.9 and above.
 
 ## Run the pipeline
+(optional) Set the cache directory in the shell: `export HF_HOME="/path/to/your/cache_dir"`  
 Run the script `scripts/pipeline.py ` with the following arguments:
 - `model_name` class name of the model to use. Currently available: Ablang, ProtBert, Sapiens, ESM1b
 - `file_path` path with the location of the input CSV file.
@@ -21,6 +23,7 @@ Run the script `scripts/pipeline.py ` with the following arguments:
         - a column with a unique sequence identifier named `sequence_id`
         - a column with the sequence specified in the parameter `sequence_column`
         - a column named `chain` with either IGH/IGL/IGK for Ig heavy chain or light chain sequences respectively, only necessary when using the models Ablang and Sapiens   
+    - When using Ablang2, the VH and VL sequences in the `sequence_column` should be separated with `|` where VH should be the first element and VL the second  
 - `sequence_column` column name of the sequence to use in the input CSV
 - `sequence_id_column` column name of the sequence identifier in the input CSV (default: sequence_id)
 - `output_folder` folder name to store output
@@ -30,7 +33,7 @@ Run the script `scripts/pipeline.py ` with the following arguments:
     - `embeddings` takes the average output embeddings for each sequence, adds it to the input CSV, and saves this as output CSV
     - `suggest_mutations`: based on the previously calculated probability matrix values it suggests a desired number of mutations
 - `number_mutations` number of mutations you want the model to suggest (default is 1)
-- `cache_dir` path to a cache directory to download the pretrained ESM1b model if the standard cache should not be used.
+- `cache_dir` path to a cache directory to download the pretrained ESM models if the standard cache should not be used.
 
 ## Adding new models
 - Create a .py file which will contain the model class in the folder `src/`. Be careful that the name of the file is not the same as any of the packages that we are using

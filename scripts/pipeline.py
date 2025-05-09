@@ -1,6 +1,5 @@
 #Import packages
 import pandas as pd
-import numpy as np
 import os
 import sys
 import argparse
@@ -11,16 +10,10 @@ sys.path.append("../src")
 #Import extra functions
 from utils import calculate_mutations
 
-#Import PLMs
-from ablang_model import Ablang
-from ESM1b_model import ESM1b
-from sapiens_model import Sapiens
-from protbert import ProtBert
-
 #### Handle command-line arguments
 parser = argparse.ArgumentParser()
 
-parser.add_argument('--model_name', help="Choose from: Ablang,ProtBert,Sapiens,ESM1b") 
+parser.add_argument('--model_name', help="Choose from: Ablang,Ablang2,ProtBert,Sapiens,ESM1b,ESMC") 
 parser.add_argument('--file_path')
 parser.add_argument('--sequences_column')
 parser.add_argument('--sequence_id_column', default="sequence_id", help="Column name in the input file where sequence ID's are stored.")
@@ -54,16 +47,26 @@ if not os.path.exists(save_path):
     os.mkdir(save_path)
 
 #### Initialize the model
-if model_name == "Ablang":   
+if model_name == "Ablang":
+    from ablang_model import Ablang   
     model_hc = Ablang(chain="heavy")
     model_lc = Ablang(chain="light")
 elif model_name == "Sapiens":
+    from sapiens_model import Sapiens
     model_hc = Sapiens(chain_type="H")
     model_lc = Sapiens(chain_type="L")
 elif model_name == "ESM1b":
+    from ESM1b_model import ESM1b
     model = ESM1b(cache_dir=cache_dir)
+elif model_name == "ESMC":
+    from ESMC_model import ESMc
+    model = ESMc()
 elif model_name == "ProtBert":
+    from protbert import ProtBert
     model = ProtBert()
+elif model_name == "Ablang2":
+    from ablang2_model import Ablang2
+    model = Ablang2()
 else:
     print("model_name is unknown.")
     sys.exit()
